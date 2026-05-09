@@ -5,41 +5,24 @@ import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Shield, Zap, Award, ChevronDown, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
-
-const FEATURES = [
-  {
-    icon: <Zap className="w-5 h-5" strokeWidth={1.5} />,
-    title: "90-Second Analysis",
-    desc: "Instant visual skin assessment powered by advanced surface analysis technology.",
-  },
-  {
-    icon: <Shield className="w-5 h-5" strokeWidth={1.5} />,
-    title: "Privacy First",
-    desc: "Your images are processed securely. No permanent storage. Full GDPR compliance.",
-  },
-  {
-    icon: <Award className="w-5 h-5" strokeWidth={1.5} />,
-    title: "Expert Recommendations",
-    desc: "Personalized treatment suggestions from BeautyBody's aesthetic specialists.",
-  },
-];
-
-const TESTIMONIAL = {
-  quote: "The analysis was incredibly accurate. It identified concerns I had been noticing myself and the recommendations led me to treatments that genuinely improved my skin.",
-  name: "María G.",
-  detail: "BeautyBody client since 2024",
-};
+import { useLanguage } from "@/hooks/use-language";
 
 export default function LandingPage() {
+  const { t } = useLanguage();
+
+  const features = [
+    { icon: <Zap className="w-5 h-5" strokeWidth={1.5} />, title: t("landing.feature1Title"), desc: t("landing.feature1Desc") },
+    { icon: <Shield className="w-5 h-5" strokeWidth={1.5} />, title: t("landing.feature2Title"), desc: t("landing.feature2Desc") },
+    { icon: <Award className="w-5 h-5" strokeWidth={1.5} />, title: t("landing.feature3Title"), desc: t("landing.feature3Desc") },
+  ];
+
   return (
     <div className="relative overflow-hidden">
-      {/* Background effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-champagne-900/8 via-transparent to-transparent pointer-events-none" />
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-champagne-500/4 rounded-full blur-3xl pointer-events-none -translate-y-1/4" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-champagne-500/3 rounded-full blur-3xl pointer-events-none translate-y-1/4" />
 
       <div className="max-w-lg mx-auto px-4 py-10 relative">
-        {/* Hero */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -61,33 +44,32 @@ export default function LandingPage() {
             transition={{ delay: 0.3 }}
             className="text-champagne-400/70 text-xs uppercase tracking-[0.25em] font-medium mb-3"
           >
-            Premium Aesthetic Clinic
+            {t("landing.subtitle")}
           </motion.p>
 
           <h1 className="font-display text-[2.5rem] leading-[1.1] text-white mb-4">
-            Discover Your
+            {t("landing.heroTitle1")}
             <br />
-            <span className="text-champagne-400">Skin&apos;s True Story</span>
+            <span className="text-champagne-400">{t("landing.heroTitle2")}</span>
           </h1>
 
           <p className="text-white/50 text-base leading-relaxed max-w-xs mx-auto mb-8">
-            A luxury AI-powered visual skin assessment that reveals your skin&apos;s unique characteristics and guides you toward your most radiant self.
+            {t("landing.heroDesc")}
           </p>
 
           <div className="flex flex-col items-center gap-3">
             <Link href="/consent" className="w-full max-w-xs">
               <Button size="lg" glow className="w-full">
-                Start Free Analysis
+                {t("landing.ctaPrimary")}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <p className="text-white/25 text-[11px]">
-              Demo simulation — not a medical diagnosis
+              {t("common.demoMode")} — {t("common.notMedical")}
             </p>
           </div>
         </motion.div>
 
-        {/* Social Proof */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -113,12 +95,11 @@ export default function LandingPage() {
               ))}
             </div>
             <span className="text-white/45 text-xs">
-              <span className="text-white font-medium">12,000+</span> analyses completed
+              <span className="text-white font-medium">12,000+</span> {t("landing.socialProof")}
             </span>
           </div>
         </motion.div>
 
-        {/* Testimonial */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -127,21 +108,20 @@ export default function LandingPage() {
         >
           <GlassCard className="p-5">
             <p className="text-white/60 text-sm leading-relaxed italic mb-4">
-              &ldquo;{TESTIMONIAL.quote}&rdquo;
+              &ldquo;{t("landing.testimonialQuote")}&rdquo;
             </p>
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-champagne-500/15 flex items-center justify-center">
-                <span className="text-champagne-400 text-xs font-bold">{TESTIMONIAL.name[0]}</span>
+                <span className="text-champagne-400 text-xs font-bold">{t("landing.testimonialName")[0]}</span>
               </div>
               <div>
-                <p className="text-white text-sm font-medium">{TESTIMONIAL.name}</p>
-                <p className="text-white/35 text-xs">{TESTIMONIAL.detail}</p>
+                <p className="text-white text-sm font-medium">{t("landing.testimonialName")}</p>
+                <p className="text-white/35 text-xs">{t("landing.testimonialDetail")}</p>
               </div>
             </div>
           </GlassCard>
         </motion.div>
 
-        {/* Features */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -149,9 +129,9 @@ export default function LandingPage() {
           className="space-y-3 mb-10"
         >
           <p className="text-white/30 text-xs uppercase tracking-[0.2em] font-medium text-center mb-4">
-            Why Choose BeautyBody
+            {t("landing.whyTitle")}
           </p>
-          {FEATURES.map((feature, i) => (
+          {features.map((feature, i) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, x: -20 }}
@@ -171,7 +151,6 @@ export default function LandingPage() {
           ))}
         </motion.div>
 
-        {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -179,16 +158,15 @@ export default function LandingPage() {
           className="text-center pb-4"
         >
           <p className="text-white/40 text-sm mb-4">
-            Ready to see what your skin is telling you?
+            {t("landing.readyText")}
           </p>
           <Link href="/consent" className="w-full max-w-xs inline-block">
             <Button variant="outline" className="w-full">
-              Begin Your Analysis
+              {t("landing.ctaSecondary")}
             </Button>
           </Link>
         </motion.div>
 
-        {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

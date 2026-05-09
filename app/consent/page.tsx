@@ -7,39 +7,7 @@ import { Shield, Check, AlertTriangle, Camera, FileText, Lock, ChevronRight } fr
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useAnalysis } from "@/context/analysis-context";
-
-const CONSENT_ITEMS = [
-  {
-    id: "analysis",
-    label: "I consent to automated visual surface analysis of my photo to generate a personalized skin report.",
-    icon: <Camera className="w-4 h-4" />,
-    required: true,
-  },
-  {
-    id: "notMedical",
-    label: "I understand this is a visual surface assessment only and not a medical diagnosis.",
-    icon: <AlertTriangle className="w-4 h-4" />,
-    required: true,
-  },
-  {
-    id: "privacy",
-    label: "I agree to the Privacy Policy and Terms of Service.",
-    icon: <FileText className="w-4 h-4" />,
-    required: true,
-  },
-  {
-    id: "simulation",
-    label: "I understand this demo uses simulated analysis for demonstration purposes.",
-    icon: <Shield className="w-4 h-4" />,
-    required: true,
-  },
-  {
-    id: "marketing",
-    label: "I consent to BeautyBody contacting me via WhatsApp with personalized treatment offers. (Optional)",
-    icon: <Lock className="w-4 h-4" />,
-    required: false,
-  },
-];
+import { useLanguage } from "@/hooks/use-language";
 
 const AGE_RANGES = [
   { value: "18-24", label: "18 – 24" },
@@ -52,17 +20,21 @@ const AGE_RANGES = [
 export default function ConsentPage() {
   const router = useRouter();
   const { setSession } = useAnalysis();
+  const { t } = useLanguage();
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [ageRange, setAgeRange] = useState("25-34");
 
-  const allRequiredChecked = CONSENT_ITEMS.filter((c) => c.required).every(
-    (c) => checked[c.id]
-  );
+  const consentItems = [
+    { id: "analysis", icon: <Camera className="w-4 h-4" />, required: true },
+    { id: "notMedical", icon: <AlertTriangle className="w-4 h-4" />, required: true },
+    { id: "privacy", icon: <FileText className="w-4 h-4" />, required: true },
+    { id: "simulation", icon: <Shield className="w-4 h-4" />, required: true },
+    { id: "marketing", icon: <Lock className="w-4 h-4" />, required: false },
+  ];
 
-  const checkedCount = CONSENT_ITEMS.filter((c) => c.required).filter(
-    (c) => checked[c.id]
-  ).length;
-  const requiredCount = CONSENT_ITEMS.filter((c) => c.required).length;
+  const allRequiredChecked = consentItems.filter((c) => c.required).every((c) => checked[c.id]);
+  const checkedCount = consentItems.filter((c) => c.required).filter((c) => checked[c.id]).length;
+  const requiredCount = consentItems.filter((c) => c.required).length;
 
   const handleToggle = (id: string) => {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -80,7 +52,6 @@ export default function ConsentPage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8 safe-area-x">
-      {/* Progress indicator */}
       <div className="flex items-center gap-2 mb-8">
         <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
           <motion.div
@@ -90,7 +61,7 @@ export default function ConsentPage() {
           />
         </div>
         <span className="text-white/30 text-[10px] uppercase tracking-wider shrink-0">
-          Step 1 of 3
+          {t("consent.stepLabel")}
         </span>
       </div>
 
@@ -103,16 +74,15 @@ export default function ConsentPage() {
           <div className="w-14 h-14 rounded-2xl bg-champagne-500/10 flex items-center justify-center mx-auto mb-4 border border-champagne-500/10">
             <Shield className="w-7 h-7 text-champagne-400" strokeWidth={1.5} />
           </div>
-          <h1 className="font-display text-2xl text-white mb-2">Your Privacy Matters</h1>
+          <h1 className="font-display text-2xl text-white mb-2">{t("consent.title")}</h1>
           <p className="text-white/45 text-sm max-w-xs mx-auto">
-            Before we begin, please review and confirm the following.
+            {t("consent.desc")}
           </p>
         </div>
 
-        {/* Age selector - custom buttons instead of native select */}
         <div className="mb-6">
           <label className="text-white/50 text-xs font-medium uppercase tracking-wider mb-3 block">
-            Your Age Range
+            {t("consent.ageLabel")}
           </label>
           <div className="flex flex-wrap gap-2">
             {AGE_RANGES.map((age) => (
@@ -131,9 +101,8 @@ export default function ConsentPage() {
           </div>
         </div>
 
-        {/* Consent items */}
         <div className="space-y-2.5 mb-8">
-          {CONSENT_ITEMS.map((item, i) => (
+          {consentItems.map((item, i) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, x: -10 }}
@@ -154,14 +123,15 @@ export default function ConsentPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-champagne-400/60">{item.icon}</span>
-                  {item.required && (
-                    <span className="text-[9px] uppercase tracking-wider text-white/25 font-medium">Required</span>
-                  )}
-                  {!item.required && (
-                    <span className="text-[9px] uppercase tracking-wider text-white/20 font-medium">Optional</span>
+                  {item.required ? (
+                    <span className="text-[9px] uppercase tracking-wider text-white/25 font-medium">{t("consent.required")}</span>
+                  ) : (
+                    <span className="text-[9px] uppercase tracking-wider text-white/20 font-medium">{t("consent.optional")}</span>
                   )}
                 </div>
-                <p className="text-white/65 text-sm leading-relaxed">{item.label}</p>
+                <p className="text-white/65 text-sm leading-relaxed">
+                  {t(`consent.consentItems.${i}`)}
+                </p>
               </div>
             </motion.div>
           ))}
@@ -174,12 +144,12 @@ export default function ConsentPage() {
           className="w-full"
           size="lg"
         >
-          Continue to Analysis
+          {t("consent.cta")}
           <ChevronRight className="ml-2 h-5 w-5" />
         </Button>
 
         <p className="text-center text-white/25 text-xs mt-4 leading-relaxed">
-          Your data is processed locally. Images are not permanently stored in this demo.
+          {t("consent.footer")}
         </p>
       </motion.div>
     </div>

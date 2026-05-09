@@ -6,16 +6,12 @@ import { motion } from "framer-motion";
 import { Camera, Sun, Sparkles, User } from "lucide-react";
 import { CameraCapture } from "@/components/analysis/camera-capture";
 import { useAnalysis } from "@/context/analysis-context";
-
-const TIPS = [
-  { icon: <Sparkles className="w-4 h-4" />, text: "Remove makeup and cleanse your face" },
-  { icon: <Sun className="w-4 h-4" />, text: "Find natural light near a window" },
-  { icon: <User className="w-4 h-4" />, text: "Pull hair back and look straight at camera" },
-];
+import { useLanguage } from "@/hooks/use-language";
 
 export default function ScanPage() {
   const router = useRouter();
   const { session, setCapturedImage } = useAnalysis();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!session) {
@@ -24,7 +20,6 @@ export default function ScanPage() {
   }, [session, router]);
 
   const handleCapture = (imageUrl: string, _file: File) => {
-    // Haptic feedback if available
     if (typeof navigator !== "undefined" && navigator.vibrate) {
       navigator.vibrate(50);
     }
@@ -34,15 +29,20 @@ export default function ScanPage() {
 
   if (!session) return null;
 
+  const tips = [
+    { icon: <Sparkles className="w-4 h-4" />, text: t("scan.tip1") },
+    { icon: <Sun className="w-4 h-4" />, text: t("scan.tip2") },
+    { icon: <User className="w-4 h-4" />, text: t("scan.tip3") },
+  ];
+
   return (
     <div className="max-w-lg mx-auto px-4 py-6 safe-area-x">
-      {/* Progress */}
       <div className="flex items-center gap-2 mb-6">
         <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
           <div className="h-full bg-champagne-500 rounded-full w-[66%]" />
         </div>
         <span className="text-white/30 text-[10px] uppercase tracking-wider shrink-0">
-          Step 2 of 3
+          {t("scan.stepLabel")}
         </span>
       </div>
 
@@ -55,9 +55,9 @@ export default function ScanPage() {
         <div className="w-12 h-12 rounded-xl bg-champagne-500/10 flex items-center justify-center mx-auto mb-3 border border-champagne-500/10">
           <Camera className="w-6 h-6 text-champagne-400" strokeWidth={1.5} />
         </div>
-        <h1 className="font-display text-2xl text-white mb-1.5">Capture Your Skin</h1>
+        <h1 className="font-display text-2xl text-white mb-1.5">{t("scan.title")}</h1>
         <p className="text-white/45 text-sm max-w-xs mx-auto">
-          Take a clear photo in natural light for the most accurate assessment.
+          {t("scan.desc")}
         </p>
       </motion.div>
 
@@ -69,7 +69,6 @@ export default function ScanPage() {
         <CameraCapture onCapture={handleCapture} />
       </motion.div>
 
-      {/* Tips */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -77,9 +76,9 @@ export default function ScanPage() {
         className="mt-8 space-y-3"
       >
         <p className="text-white/30 text-[10px] uppercase tracking-[0.2em] font-medium text-center mb-3">
-          For Best Results
+          {t("scan.tipLabel")}
         </p>
-        {TIPS.map((tip, i) => (
+        {tips.map((tip, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, x: -10 }}

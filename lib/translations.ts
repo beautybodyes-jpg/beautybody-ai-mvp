@@ -1,664 +1,136 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-
-type Lang = "en" | "ru" | "es";
-
-const STORAGE_KEY = "beautybody-lang";
+export type Lang = "en" | "ru" | "es";
+export const DEFAULT_LANG: Lang = "es";
+export const LANG_NAMES: Record<Lang, string> = { en: "EN", ru: "RU", es: "ES" };
 
 export const translations = {
   en: {
-    // Navbar
-    navBrand: "BeautyBody",
-    navSubtitle: "AI Skin Expert",
-    navAnalyze: "Analyze",
-
-    // Landing
-    landingTag: "Premium Aesthetic Clinic",
-    landingTitle1: "Discover Your",
-    landingTitle2: "Skin's True Story",
-    landingDesc: "A luxury AI-powered visual skin assessment that reveals your skin's unique characteristics and guides you toward your most radiant self.",
-    landingCtaPrimary: "Start Free Analysis",
-    landingCtaSecondary: "Begin Your Analysis",
-    landingDemoLabel: "Demo simulation — not a medical diagnosis",
-    landingSocialProof: "analyses completed",
-    landingTestimonialQuote: "The analysis was incredibly accurate. It identified concerns I had been noticing myself and the recommendations led me to treatments that genuinely improved my skin.",
-    landingTestimonialName: "María G.",
-    landingTestimonialDetail: "BeautyBody client since 2024",
-    landingWhyTitle: "Why Choose BeautyBody",
-    landingFeature1Title: "90-Second Analysis",
-    landingFeature1Desc: "Instant visual skin assessment powered by advanced surface analysis technology.",
-    landingFeature2Title: "Privacy First",
-    landingFeature2Desc: "Your images are processed securely. No permanent storage. Full GDPR compliance.",
-    landingFeature3Title: "Expert Recommendations",
-    landingFeature3Desc: "Personalized treatment suggestions from BeautyBody's aesthetic specialists.",
-    landingReady: "Ready to see what your skin is telling you?",
-
-    // Consent
-    consentStep: "Step 1 of 3",
-    consentTitle: "Your Privacy Matters",
-    consentDesc: "Before we begin, please review and confirm the following.",
-    consentAgeLabel: "Your Age Range",
-    consentRequired: "Required",
-    consentOptional: "Optional",
-    consentItemAnalysis: "I consent to automated visual surface analysis of my photo to generate a personalized skin report.",
-    consentItemNotMedical: "I understand this is a visual surface assessment only and not a medical diagnosis.",
-    consentItemPrivacy: "I agree to the Privacy Policy and Terms of Service.",
-    consentItemSimulation: "I understand this demo uses simulated analysis for demonstration purposes.",
-    consentItemMarketing: "I consent to BeautyBody contacting me via WhatsApp with personalized treatment offers.",
-    consentContinue: "Continue to Analysis",
-    consentDataNote: "Your data is processed locally. Images are not permanently stored in this demo.",
-
-    // Scan
-    scanStep: "Step 2 of 3",
-    scanTitle: "Capture Your Skin",
-    scanDesc: "Take a clear photo in natural light for the most accurate assessment.",
-    scanTip1: "Remove makeup and cleanse your face",
-    scanTip2: "Find natural light near a window",
-    scanTip3: "Pull hair back and look straight at camera",
-    scanBestResults: "For Best Results",
-    scanOpenCamera: "Open Camera",
-    scanUploadPhoto: "Upload Photo",
-    scanCancel: "Cancel",
-    scanCapture: "Capture",
-    scanRetake: "Retake",
-    scanAnalyze: "Analyze My Skin",
-    scanPreview: "Preview",
-    scanFrontCamera: "Front Camera",
-    scanPositionFace: "Position your face in the oval",
-    scanErrorCamera: "Camera access denied. Please use photo upload instead.",
-    scanErrorFile: "Please upload an image file.",
-
-    // Processing
-    processingInitializing: "Initializing scan protocol",
-    processingTexture: "Mapping skin texture",
-    processingHydration: "Analyzing hydration surface",
-    processingPigmentation: "Evaluating pigmentation",
-    processingPores: "Measuring pore density",
-    processingElasticity: "Assessing elasticity markers",
-    processingCrossRef: "Cross-referencing skin profile",
-    processingGenerating: "Generating personalized report",
-    processingScanning: "Scanning",
-    processingPercent: "percent",
-    processingDemoLabel: "Demo Simulation — Visual Assessment Only",
-
-    // Results
-    resultsDemoLabel: "Demo Mode — Simulation Results",
-    resultsYourScore: "Your Skin Score",
-    resultsSkinAge: "Skin Age",
-    resultsActualAge: "Actual Age",
-    resultsParameters: "Parameters",
-    resultsFocusArea: "Focus Area",
-    resultsYrsYounger: "yrs younger",
-    resultsYrsOlder: "yrs older",
-    resultsMatchesAge: "Matches your age",
-    resultsDetailedAnalysis: "Detailed Analysis",
-    resultsRecommended: "Recommended For You",
-    resultsBasedOn: "Based on your analysis, these treatments address your priority areas.",
-    resultsSelected: "selected",
-    resultsBookConsultation: "Book Free Consultation",
-    resultsViewReport: "View Full Report",
-    resultsPriorityFocus: "Priority Focus",
-    resultsTopStrength: "Top Strength",
-
-    // Report
-    reportYourAnalysis: "Your Skin Analysis",
-    reportSubtitle: "AI Skin Expert — Visual Surface Assessment",
-    reportScore: "Score",
-    reportSkinAge: "Skin Age",
-    reportActualAge: "Actual Age",
-    reportParameters: "Parameters",
-    reportDetailedResults: "Detailed Results",
-    reportRecommendedTreatments: "Recommended Treatments",
-    reportScanToBook: "Scan to Book",
-    reportAbout: "Premium aesthetic treatments tailored to your unique skin. Book your free consultation today.",
-    reportDisclaimer: "Disclaimer: This analysis is based on visual surface indicators only and is not a medical diagnosis. Results are simulated for demonstration purposes. For medical concerns, please consult a dermatologist.",
-    reportSavePdf: "Save Report as PDF",
-
-    // Booking
-    bookingTitle: "Book Your Consultation",
-    bookingDesc: "Connect with a BeautyBody specialist via WhatsApp to discuss your personalized plan.",
-    bookingAnalysisSummary: "Your Analysis Summary",
-    bookingOverallScore: "Overall Score",
-    bookingSkinAge: "Skin Age",
-    bookingInterestedTreatments: "Interested treatments",
-    bookingPreferredTime: "Preferred Time",
-    bookingAdditionalNotes: "Additional Notes",
-    bookingNotesPlaceholder: "e.g., First-time client, sensitive skin, specific concerns...",
-    bookingSendWhatsApp: "Send WhatsApp Message",
-    bookingWhatsAppNote: "Opens WhatsApp with a pre-filled message to +34 603 847 323",
-    bookingMessageSent: "Message Sent!",
-    bookingReplyTime: "A BeautyBody specialist will review your analysis and reply within 2 hours.",
-    bookingWhatNext: "What happens next?",
-    bookingStep1: "Our team reviews your skin analysis results",
-    bookingStep2: "We suggest available consultation slots via WhatsApp",
-    bookingStep3: "You visit the clinic for your personalized treatment plan",
-    bookingShareFriend: "Share With a Friend",
-    bookingViewReport: "View Your Report",
-    bookingBackHome: "Back to Home",
-    bookingBack: "Back",
-
-    // Footer
-    footerBrand: "BeautyBody",
-    footerDemo: "Demo Version",
-    footerDisclaimer: "This is a visual surface assessment simulation, not a medical diagnosis.",
-
-    // Severity labels
-    severityExcellent: "Excellent",
-    severityGood: "Good",
-    severityFair: "Fair",
-    severityAttention: "Needs Attention",
-    severityPriority: "Priority",
-
-    // Skin parameters
-    paramTexture: "Skin Texture",
-    paramTextureDesc: "Surface smoothness and fine line visibility",
-    paramTextureTip: "Regular exfoliation and hydration improve texture over time.",
-    paramEvenness: "Evenness",
-    paramEvennessDesc: "Skin tone uniformity and discoloration",
-    paramEvennessTip: "Vitamin C and SPF are key for maintaining even skin tone.",
-    paramRadiance: "Radiance",
-    paramRadianceDesc: "Skin luminosity and healthy glow",
-    paramRadianceTip: "Antioxidants and adequate sleep boost natural radiance.",
-    paramFirmness: "Firmness",
-    paramFirmnessDesc: "Skin elasticity and contour appearance",
-    paramFirmnessTip: "Collagen-boosting treatments help maintain firmness.",
-    paramPores: "Pore Appearance",
-    paramPoresDesc: "Visible pore size and density",
-    paramPoresTip: "Niacinamide and professional peels refine pore appearance.",
-    paramUnderEye: "Under-Eye Area",
-    paramUnderEyeDesc: "Eye contour quality and darkness",
-    paramUnderEyeTip: "Targeted eye treatments and hydration reduce visible fatigue.",
-    paramRedness: "Redness Balance",
-    paramRednessDesc: "Surface redness and inflammation visibility",
-    paramRednessTip: "Calming ingredients like centella help balance redness.",
-    paramHydration: "Hydration Surface",
-    paramHydrationDesc: "Surface moisture and reflectivity",
-    paramHydrationTip: "Hyaluronic acid and barrier repair support surface hydration.",
-
-    // Treatments
-    treatmentChemicalPeel: "Chemical Peel",
-    treatmentChemicalPeelDesc: "A professional exfoliation treatment that removes dead skin cells, revealing smoother, more radiant skin beneath.",
-    treatmentHydrationFacial: "Hydration Infusion Facial",
-    treatmentHydrationFacialDesc: "Deep moisture delivery using hyaluronic acid and ceramides to restore plumpness and surface reflectivity.",
-    treatmentIpl: "IPL Photofacial",
-    treatmentIplDesc: "Intense Pulsed Light therapy targeting discoloration, redness, and uneven skin tone for a balanced complexion.",
-    treatmentMicroneedling: "Microneedling",
-    treatmentMicroneedlingDesc: "Collagen induction therapy that improves texture, firmness, and fine lines through controlled micro-injuries.",
-    treatmentUnderEye: "Under-Eye Revive",
-    treatmentUnderEyeDesc: "Specialized treatment targeting dark circles, puffiness, and fine lines around the delicate eye contour.",
-    treatmentRadiofrequency: "Radiofrequency Firming",
-    treatmentRadiofrequencyDesc: "Non-invasive skin tightening using RF energy to stimulate collagen and improve elasticity.",
-
-    // Time preferences
-    timeMorning: "Morning",
-    timeMorningRange: "9:00 – 12:00",
-    timeAfternoon: "Afternoon",
-    timeAfternoonRange: "12:00 – 17:00",
-    timeEvening: "Evening",
-    timeEveningRange: "17:00 – 20:00",
-    timeAny: "Any Time",
-    timeAnyRange: "Flexible",
-
-    // Age ranges
-    age18_24: "18 – 24",
-    age25_34: "25 – 34",
-    age35_44: "35 – 44",
-    age45_54: "45 – 54",
-    age55plus: "55+",
-
-    // Loading / 404
-    loadingTitle: "Loading BeautyBody",
-    loadingSubtitle: "AI Skin Expert",
-    notFoundError: "Error",
-    notFoundTitle: "404",
-    notFoundDesc: "This page doesn't exist.",
-    notFoundBack: "Back to Home",
+    common: { brand: "BeautyBody", tagline: "AI Skin Expert", analyze: "Analyze", back: "Back", continue: "Continue", cancel: "Cancel", save: "Save", download: "Download", share: "Share", book: "Book", demoMode: "Demo Mode — Simulation", notMedical: "This is a visual surface assessment, not a medical diagnosis." },
+    landing: { subtitle: "Premium Aesthetic Clinic", heroTitle1: "Discover Your", heroTitle2: "Skin's True Story", heroDesc: "A luxury AI-powered visual skin assessment that reveals your skin's unique characteristics and guides you toward your most radiant self.", ctaPrimary: "Start Free Analysis", ctaSecondary: "Begin Your Analysis", socialProof: "analyses completed", testimonialQuote: "The analysis was incredibly accurate. It identified concerns I had been noticing myself and the recommendations led me to treatments that genuinely improved my skin.", testimonialName: "María G.", testimonialDetail: "BeautyBody client since 2024", whyTitle: "Why Choose BeautyBody", feature1Title: "90-Second Analysis", feature1Desc: "Instant visual skin assessment powered by advanced surface analysis technology.", feature2Title: "Privacy First", feature2Desc: "Your images are processed securely. No permanent storage. Full GDPR compliance.", feature3Title: "Expert Recommendations", feature3Desc: "Personalized treatment suggestions from BeautyBody's aesthetic specialists.", readyText: "Ready to see what your skin is telling you?" },
+    consent: { stepLabel: "Step 1 of 3", title: "Your Privacy Matters", desc: "Before we begin, please review and confirm the following.", ageLabel: "Your Age Range", required: "Required", optional: "Optional", consentItems: ["I consent to automated visual surface analysis of my photo to generate a personalized skin report.", "I understand this is a visual surface assessment only and not a medical diagnosis.", "I agree to the Privacy Policy and Terms of Service.", "I understand this demo uses simulated analysis for demonstration purposes.", "I consent to BeautyBody contacting me via WhatsApp with personalized treatment offers. (Optional)"], cta: "Continue to Analysis", footer: "Your data is processed locally. Images are not permanently stored in this demo." },
+    scan: { stepLabel: "Step 2 of 3", title: "Capture Your Skin", desc: "Take a clear photo in natural light for the most accurate assessment.", tipLabel: "For Best Results", tip1: "Remove makeup and cleanse your face", tip2: "Find natural light near a window", tip3: "Pull hair back and look straight at camera", openCamera: "Open Camera", uploadPhoto: "Upload Photo", previewLabel: "Preview", retake: "Retake", analyzeSkin: "Analyze My Skin", cameraError: "Camera access denied. Please use photo upload instead.", fileError: "Please upload an image file.", captureLabel: "Capture Your Skin", captureDesc: "For best results, remove makeup, find natural light, and pull your hair back.", frontCamera: "Front Camera", positionFace: "Position your face in the oval" },
+    processing: { percentLabel: "percent", scanning: "Scanning", steps: ["Initializing scan protocol", "Mapping skin texture", "Analyzing hydration surface", "Evaluating pigmentation", "Measuring pore density", "Assessing elasticity markers", "Cross-referencing skin profile", "Generating personalized report"], regions: ["Full face", "T-zone & cheeks", "Forehead", "Cheekbones", "Nose area", "Jawline", "Under-eye", "Complete"], demoLabel: "Demo Simulation — Visual Assessment Only" },
+    results: { yourSkinScore: "Your Skin Score", skinAge: "Skin Age", actualAge: "Actual Age", parameters: "parameters", focusArea: "Focus Area", detailedAnalysis: "Detailed Analysis", recommendedForYou: "Recommended For You", recDesc: "Based on your analysis, these treatments address your priority areas.", selected: "selected", bookConsultation: "Book Free Consultation", viewReport: "View Full Report", priorityFocus: "Priority Focus", topStrength: "Top Strength", yrsYounger: "yrs younger", yrsOlder: "yrs older", matchesAge: "Matches your age" },
+    parameters: {
+      texture: { name: "Skin Texture", desc: "Surface smoothness and fine line visibility", tip: "Regular exfoliation and hydration improve texture over time." },
+      evenness: { name: "Evenness", desc: "Skin tone uniformity and discoloration", tip: "Vitamin C and SPF are key for maintaining even skin tone." },
+      radiance: { name: "Radiance", desc: "Skin luminosity and healthy glow", tip: "Antioxidants and adequate sleep boost natural radiance." },
+      firmness: { name: "Firmness", desc: "Skin elasticity and contour appearance", tip: "Collagen-boosting treatments help maintain firmness." },
+      pores: { name: "Pore Appearance", desc: "Visible pore size and density", tip: "Niacinamide and professional peels refine pore appearance." },
+      underEye: { name: "Under-Eye Area", desc: "Eye contour quality and darkness", tip: "Targeted eye treatments and hydration reduce visible fatigue." },
+      redness: { name: "Redness Balance", desc: "Surface redness and inflammation visibility", tip: "Calming ingredients like centella help balance redness." },
+      hydration: { name: "Hydration Surface", desc: "Surface moisture and reflectivity", tip: "Hyaluronic acid and barrier repair support surface hydration." },
+    },
+    report: { savePdf: "Save as PDF", yourSkinAnalysis: "Your Skin Analysis", visualAssessment: "AI Skin Expert — Visual Surface Assessment", detailedResults: "Detailed Results", recommendedTreatments: "Recommended Treatments", about: "About BeautyBody", aboutDesc: "Premium aesthetic treatments tailored to your unique skin. Book your free consultation today.", disclaimer: "Disclaimer: This analysis is based on visual surface indicators only and is not a medical diagnosis. Results are simulated for demonstration purposes. For medical concerns, please consult a dermatologist.", scanToBook: "Scan to Book" },
+    book: { title: "Book Your Consultation", desc: "Connect with a BeautyBody specialist via WhatsApp to discuss your personalized plan.", analysisSummary: "Your Analysis Summary", overallScore: "Overall Score", skinAge: "Skin Age", interestedTreatments: "Interested treatments", preferredTime: "Preferred Time", additionalNotes: "Additional Notes", notesPlaceholder: "e.g., First-time client, sensitive skin, specific concerns...", sendWhatsApp: "Send WhatsApp Message", whatsAppNote: "Opens WhatsApp with a pre-filled message to +34 603 847 323", morning: "Morning", afternoon: "Afternoon", evening: "Evening", anyTime: "Any Time", timeMorning: "9:00 – 12:00", timeAfternoon: "12:00 – 17:00", timeEvening: "17:00 – 20:00", timeAny: "Flexible", successTitle: "Message Sent!", successDesc: "A BeautyBody specialist will review your analysis and reply within 2 hours.", whatNext: "What happens next?", step1: "Our team reviews your skin analysis results", step2: "We suggest available consultation slots via WhatsApp", step3: "You visit the clinic for your personalized treatment plan", shareFriend: "Share With a Friend", viewReport: "View Your Report", backHome: "Back to Home" },
+    treatments: {
+      "chemical-peel": { name: "Chemical Peel", desc: "A professional exfoliation treatment that removes dead skin cells, revealing smoother, more radiant skin beneath." },
+      "hydration-facial": { name: "Hydration Infusion Facial", desc: "Deep moisture delivery using hyaluronic acid and ceramides to restore plumpness and surface reflectivity." },
+      "ipl-photofacial": { name: "IPL Photofacial", desc: "Intense Pulsed Light therapy targeting discoloration, redness, and uneven skin tone for a balanced complexion." },
+      "microneedling": { name: "Microneedling", desc: "Collagen induction therapy that improves texture, firmness, and fine lines through controlled micro-injuries." },
+      "under-eye-revive": { name: "Under-Eye Revive", desc: "Specialized treatment targeting dark circles, puffiness, and fine lines around the delicate eye contour." },
+      "radiofrequency": { name: "Radiofrequency Firming", desc: "Non-invasive skin tightening using RF energy to stimulate collagen and improve elasticity." },
+    },
+    severity: { excellent: "Excellent", good: "Good", fair: "Fair", attention: "Needs Attention", priority: "Priority" },
   },
-
   ru: {
-    // Navbar
-    navBrand: "BeautyBody",
-    navSubtitle: "AI Эксперт по Коже",
-    navAnalyze: "Анализ",
-
-    // Landing
-    landingTag: "Премиум Эстетическая Клиника",
-    landingTitle1: "Откройте",
-    landingTitle2: "Историю Вашей Кожи",
-    landingDesc: "Роскошный визуальный анализ кожи с ИИ, который раскрывает уникальные характеристики вашей кожи и ведёт к сияющему результату.",
-    landingCtaPrimary: "Начать Бесплатный Анализ",
-    landingCtaSecondary: "Начать Анализ",
-    landingDemoLabel: "Демо-режим — не является медицинским диагнозом",
-    landingSocialProof: "анализов выполнено",
-    landingTestimonialQuote: "Анализ был невероятно точным. Он выявил проблемы, которые я сама замечала, и рекомендации привели меня к процедурам, которые genuinely улучшили мою кожу.",
-    landingTestimonialName: "Мария Г.",
-    landingTestimonialDetail: "Клиент BeautyBody с 2024",
-    landingWhyTitle: "Почему BeautyBody",
-    landingFeature1Title: "Анализ за 90 секунд",
-    landingFeature1Desc: "Мгновенный визуальный анализ кожи на основе передовой технологии поверхностного сканирования.",
-    landingFeature2Title: "Приватность Прежде Всего",
-    landingFeature2Desc: "Ваши изображения обрабатываются безопасно. Без постоянного хранения. Полное соответствие GDPR.",
-    landingFeature3Title: "Экспертные Рекомендации",
-    landingFeature3Desc: "Персонализированные рекомендации по процедурам от специалистов BeautyBody.",
-    landingReady: "Готовы узнать, что ваша кожа вам говорит?",
-
-    // Consent
-    consentStep: "Шаг 1 из 3",
-    consentTitle: "Ваша Конфиденциальность Важна",
-    consentDesc: "Прежде чем мы начнём, пожалуйста, ознакомьтесь и подтвердите следующее.",
-    consentAgeLabel: "Ваш Возраст",
-    consentRequired: "Обязательно",
-    consentOptional: "Опционально",
-    consentItemAnalysis: "Я даю согласие на автоматизированный визуальный анализ поверхности моего лица для создания персонализированного отчёта о состоянии кожи.",
-    consentItemNotMedical: "Я понимаю, что это только визуальная поверхностная оценка и не является медицинским диагнозом.",
-    consentItemPrivacy: "Я согласен с Политикой Конфиденциальности и Условиями Использования.",
-    consentItemSimulation: "Я понимаю, что это демо-версия использует симулированный анализ в демонстрационных целях.",
-    consentItemMarketing: "Я даю согласие на то, что BeautyBody свяжется со мной через WhatsApp с персонализированными предложениями по процедурам.",
-    consentContinue: "Продолжить к Анализу",
-    consentDataNote: "Ваши данные обрабатываются локально. Изображения не сохраняются постоянно в этой демо-версии.",
-
-    // Scan
-    scanStep: "Шаг 2 из 3",
-    scanTitle: "Сфотографируйте Вашу Кожу",
-    scanDesc: "Сделайте чёткое фото при естественном освещении для наиболее точной оценки.",
-    scanTip1: "Смойте макияж и очистите лицо",
-    scanTip2: "Найдите естественный свет у окна",
-    scanTip3: "Уберите волосы назад и смотрите прямо в камеру",
-    scanBestResults: "Для Лучших Результатов",
-    scanOpenCamera: "Открыть Камеру",
-    scanUploadPhoto: "Загрузить Фото",
-    scanCancel: "Отмена",
-    scanCapture: "Сделать Фото",
-    scanRetake: "Переснять",
-    scanAnalyze: "Проанализировать Мою Кожу",
-    scanPreview: "Предпросмотр",
-    scanFrontCamera: "Фронтальная Камера",
-    scanPositionFace: "Поместите лицо в овал",
-    scanErrorCamera: "Доступ к камере запрещён. Пожалуйста, используйте загрузку фото.",
-    scanErrorFile: "Пожалуйста, загрузите файл изображения.",
-
-    // Processing
-    processingInitializing: "Инициализация протокола сканирования",
-    processingTexture: "Картирование текстуры кожи",
-    processingHydration: "Анализ поверхностного увлажнения",
-    processingPigmentation: "Оценка пигментации",
-    processingPores: "Измерение плотности пор",
-    processingElasticity: "Оценка маркеров эластичности",
-    processingCrossRef: "Перекрёстная проверка профиля кожи",
-    processingGenerating: "Генерация персонализированного отчёта",
-    processingScanning: "Сканирование",
-    processingPercent: "процентов",
-    processingDemoLabel: "Демо-Симуляция — Только Визуальная Оценка",
-
-    // Results
-    resultsDemoLabel: "Демо-Режим — Результаты Симуляции",
-    resultsYourScore: "Оценка Вашей Кожи",
-    resultsSkinAge: "Возраст Кожи",
-    resultsActualAge: "Реальный Возраст",
-    resultsParameters: "Параметры",
-    resultsFocusArea: "Область Фокуса",
-    resultsYrsYounger: "лет моложе",
-    resultsYrsOlder: "лет старше",
-    resultsMatchesAge: "Соответствует вашему возрасту",
-    resultsDetailedAnalysis: "Детальный Анализ",
-    resultsRecommended: "Рекомендовано Для Вас",
-    resultsBasedOn: "На основе вашего анализа эти процедуры адресуют ваши приоритетные зоны.",
-    resultsSelected: "выбрано",
-    resultsBookConsultation: "Записаться на Бесплатную Консультацию",
-    resultsViewReport: "Посмотреть Полный Отчёт",
-    resultsPriorityFocus: "Приоритетный Фокус",
-    resultsTopStrength: "Главная Сила",
-
-    // Report
-    reportYourAnalysis: "Ваш Анализ Кожи",
-    reportSubtitle: "AI Эксперт по Коже — Визуальная Поверхностная Оценка",
-    reportScore: "Оценка",
-    reportSkinAge: "Возраст Кожи",
-    reportActualAge: "Реальный Возраст",
-    reportParameters: "Параметры",
-    reportDetailedResults: "Детальные Результаты",
-    reportRecommendedTreatments: "Рекомендуемые Процедуры",
-    reportScanToBook: "Отсканируйте для Записи",
-    reportAbout: "Премиум эстетические процедуры, адаптированные под вашу уникальную кожу. Запишитесь на бесплатную консультацию сегодня.",
-    reportDisclaimer: "Отказ от ответственности: Этот анализ основан только на визуальных поверхностных индикаторах и не является медицинским диагнозом. Результаты являются симулированными в демонстрационных целях. При медицинских проблемах обратитесь к дерматологу.",
-    reportSavePdf: "Сохранить Отчёт как PDF",
-
-    // Booking
-    bookingTitle: "Записаться на Консультацию",
-    bookingDesc: "Свяжитесь со специалистом BeautyBody через WhatsApp, чтобы обсудить ваш персонализированный план.",
-    bookingAnalysisSummary: "Сводка Вашего Анализа",
-    bookingOverallScore: "Общая Оценка",
-    bookingSkinAge: "Возраст Кожи",
-    bookingInterestedTreatments: "Интересующие процедуры",
-    bookingPreferredTime: "Предпочтительное Время",
-    bookingAdditionalNotes: "Дополнительные Примечания",
-    bookingNotesPlaceholder: "например, первый визит, чувствительная кожа, конкретные проблемы...",
-    bookingSendWhatsApp: "Отправить Сообщение в WhatsApp",
-    bookingWhatsAppNote: "Открывает WhatsApp с предзаполненным сообщением для +34 603 847 323",
-    bookingMessageSent: "Сообщение Отправлено!",
-    bookingReplyTime: "Специалист BeautyBody рассмотрит ваш анализ и ответит в течение 2 часов.",
-    bookingWhatNext: "Что дальше?",
-    bookingStep1: "Наша команда рассматривает результаты вашего анализа кожи",
-    bookingStep2: "Мы предлагаем доступные слоты для консультации через WhatsApp",
-    bookingStep3: "Вы посещаете клинику для вашего персонализированного плана лечения",
-    bookingShareFriend: "Поделиться с Другом",
-    bookingViewReport: "Посмотреть Отчёт",
-    bookingBackHome: "На Главную",
-    bookingBack: "Назад",
-
-    // Footer
-    footerBrand: "BeautyBody",
-    footerDemo: "Демо-Версия",
-    footerDisclaimer: "Это симуляция визуальной поверхностной оценки, не является медицинским диагнозом.",
-
-    // Severity labels
-    severityExcellent: "Отлично",
-    severityGood: "Хорошо",
-    severityFair: "Средне",
-    severityAttention: "Требует Внимания",
-    severityPriority: "Приоритет",
-
-    // Skin parameters
-    paramTexture: "Текстура Кожи",
-    paramTextureDesc: "Гладкость поверхности и видимость мелких линий",
-    paramTextureTip: "Регулярный пилинг и увлажнение со временем улучшают текстуру.",
-    paramEvenness: "Равномерность",
-    paramEvennessDesc: "Однородность тона кожи и пигментация",
-    paramEvennessTip: "Витамин C и SPF — ключ к поддержанию равномерного тона кожи.",
-    paramRadiance: "Сияние",
-    paramRadianceDesc: "Светимость кожи и здоровое сияние",
-    paramRadianceTip: "Антиоксиданты и полноценный сон усиливают естественное сияние.",
-    paramFirmness: "Упругость",
-    paramFirmnessDesc: "Эластичность кожи и контур лица",
-    paramFirmnessTip: "Процедуры для стимуляции коллагена помогают поддерживать упругость.",
-    paramPores: "Поры",
-    paramPoresDesc: "Видимый размер и плотность пор",
-    paramPoresTip: "Ниацинамид и профессиональные пилинги уточняют вид пор.",
-    paramUnderEye: "Область Под Глазами",
-    paramUnderEyeDesc: "Качество контура глаз и тёмные круги",
-    paramUnderEyeTip: "Целевые средства для глаз и увлажнение уменьшают видимую усталость.",
-    paramRedness: "Баланс Покраснения",
-    paramRednessDesc: "Покраснение поверхности и видимость воспаления",
-    paramRednessTip: "Успокаивающие ингредиенты, такие как центелла, помогают балансировать покраснение.",
-    paramHydration: "Увлажнение Поверхности",
-    paramHydrationDesc: "Влажность поверхности и отражение света",
-    paramHydrationTip: "Гиалуроновая кислота и восстановление барьера поддерживают поверхностное увлажнение.",
-
-    // Treatments
-    treatmentChemicalPeel: "Химический Пилинг",
-    treatmentChemicalPeelDesc: "Профессиональная процедура эксфолиации, удаляющая мёртвые клетки кожи и открывающая более гладкую, сияющую кожу.",
-    treatmentHydrationFacial: "Увлажняющий Фейшл",
-    treatmentHydrationFacialDesc: "Глубокое увлажнение с использованием гиалуроновой кислоты и керамидов для восстановления упругости и отражения света.",
-    treatmentIpl: "IPL Фототерапия",
-    treatmentIplDesc: "Терапия интенсивным импульсным светом, направленная на дисколорацию, покраснение и неравномерный тон кожи.",
-    treatmentMicroneedling: "Микронидлинг",
-    treatmentMicroneedlingDesc: "Терапия индукции коллагена, улучшающая текстуру, упругость и мелкие линии через контролируемые микроповреждения.",
-    treatmentUnderEye: "Восстановление Под Глазами",
-    treatmentUnderEyeDesc: "Специализированная процедура, направленная на тёмные круги, отёки и мелкие линии вокруг деликатного контура глаз.",
-    treatmentRadiofrequency: "RF-Лифтинг",
-    treatmentRadiofrequencyDesc: "Неинвазивный лифтинг кожи с использованием RF-энергии для стимуляции коллагена и улучшения эластичности.",
-
-    // Time preferences
-    timeMorning: "Утро",
-    timeMorningRange: "9:00 – 12:00",
-    timeAfternoon: "День",
-    timeAfternoonRange: "12:00 – 17:00",
-    timeEvening: "Вечер",
-    timeEveningRange: "17:00 – 20:00",
-    timeAny: "Любое Время",
-    timeAnyRange: "Гибкий график",
-
-    // Age ranges
-    age18_24: "18 – 24",
-    age25_34: "25 – 34",
-    age35_44: "35 – 44",
-    age45_54: "45 – 54",
-    age55plus: "55+",
-
-    // Loading / 404
-    loadingTitle: "Загрузка BeautyBody",
-    loadingSubtitle: "AI Эксперт по Коже",
-    notFoundError: "Ошибка",
-    notFoundTitle: "404",
-    notFoundDesc: "Эта страница не существует.",
-    notFoundBack: "На Главную",
+    common: { brand: "BeautyBody", tagline: "AI Эксперт по Коже", analyze: "Анализ", back: "Назад", continue: "Продолжить", cancel: "Отмена", save: "Сохранить", download: "Скачать", share: "Поделиться", book: "Записаться", demoMode: "Демо-режим — Симуляция", notMedical: "Это визуальная поверхностная оценка, а не медицинский диагноз." },
+    landing: { subtitle: "Премиум Эстетическая Клиника", heroTitle1: "Открой", heroTitle2: "Историю Своей Кожи", heroDesc: "Роскошный анализ кожи с ИИ, который раскрывает уникальные особенности вашей кожи и направляет к сиянию.", ctaPrimary: "Начать Бесплатный Анализ", ctaSecondary: "Начать Анализ", socialProof: "анализов завершено", testimonialQuote: "Анализ был невероятно точным. Он выявил проблемы, которые я сама замечала, и рекомендации привели к процедурам, которые genuinely улучшили мою кожу.", testimonialName: "Мария Г.", testimonialDetail: "Клиент BeautyBody с 2024", whyTitle: "Почему BeautyBody", feature1Title: "Анализ за 90 секунд", feature1Desc: "Мгновенная визуальная оценка кожи с помощью передовой технологии поверхностного анализа.", feature2Title: "Приватность Прежде Всего", feature2Desc: "Ваши изображения обрабатываются безопасно. Без постоянного хранения. Полное соответствие GDPR.", feature3Title: "Экспертные Рекомендации", feature3Desc: "Персонализированные рекомендации по процедурам от специалистов BeautyBody.", readyText: "Готовы узнать, что ваша кожа вам говорит?" },
+    consent: { stepLabel: "Шаг 1 из 3", title: "Ваша Конфиденциальность Важна", desc: "Прежде чем мы начнём, пожалуйста, ознакомьтесь и подтвердите следующее.", ageLabel: "Ваш Возраст", required: "Обязательно", optional: "Опционально", consentItems: ["Я даю согласие на автоматизированный визуальный анализ моего фото для создания персонализированного отчёта о коже.", "Я понимаю, что это только визуальная поверхностная оценка, а не медицинский диагноз.", "Я согласен с Политикой Конфиденциальности и Условиями Использования.", "Я понимаю, что это демо использует симулированный анализ в демонстрационных целях.", "Я даю согласие на то, что BeautyBody свяжется со мной через WhatsApp с персонализированными предложениями. (Опционально)"], cta: "Продолжить к Анализу", footer: "Ваши данные обрабатываются локально. Изображения не хранятся постоянно в этом демо." },
+    scan: { stepLabel: "Шаг 2 из 3", title: "Сфотографируйте Кожу", desc: "Сделайте чёткое фото при естественном освещении для наиболее точной оценки.", tipLabel: "Для Лучших Результатов", tip1: "Удалите макияж и очистите лицо", tip2: "Найдите естественный свет у окна", tip3: "Уберите волосы назад и смотрите прямо в камеру", openCamera: "Открыть Камеру", uploadPhoto: "Загрузить Фото", previewLabel: "Предпросмотр", retake: "Переснять", analyzeSkin: "Проанализировать Кожу", cameraError: "Доступ к камере запрещён. Пожалуйста, используйте загрузку фото.", fileError: "Пожалуйста, загрузите файл изображения.", captureLabel: "Сфотографируйте Кожу", captureDesc: "Для лучших результатов удалите макияж, найдите естественный свет и уберите волосы назад.", frontCamera: "Фронтальная Камера", positionFace: "Поместите лицо в овал" },
+    processing: { percentLabel: "процент", scanning: "Сканирование", steps: ["Инициализация протокола сканирования", "Картирование текстуры кожи", "Анализ поверхностной гидратации", "Оценка пигментации", "Измерение плотности пор", "Оценка маркеров эластичности", "Перекрёстная проверка профиля кожи", "Генерация персонализированного отчёта"], regions: ["Всё лицо", "T-зона и щёки", "Лоб", "Скулы", "Область носа", "Линия подбородка", "Под глазами", "Завершено"], demoLabel: "Демо-Симуляция — Только Визуальная Оценка" },
+    results: { yourSkinScore: "Ваш Скор Кожи", skinAge: "Возраст Кожи", actualAge: "Реальный Возраст", parameters: "параметров", focusArea: "Фокус Области", detailedAnalysis: "Детальный Анализ", recommendedForYou: "Рекомендовано Для Вас", recDesc: "На основе вашего анализа эти процедуры адресуют ваши приоритетные зоны.", selected: "выбрано", bookConsultation: "Записаться на Консультацию", viewReport: "Посмотреть Полный Отчёт", priorityFocus: "Приоритетный Фокус", topStrength: "Главная Сила", yrsYounger: "лет моложе", yrsOlder: "лет старше", matchesAge: "Соответствует возрасту" },
+    parameters: {
+      texture: { name: "Текстура Кожи", desc: "Гладкость поверхности и видимость мелких линий", tip: "Регулярный пилинг и увлажнение со временем улучшают текстуру." },
+      evenness: { name: "Равномерность", desc: "Однородность тона кожи и пигментация", tip: "Витамин C и SPF — ключ к поддержанию ровного тона." },
+      radiance: { name: "Сияние", desc: "Светимость кожи и здоровое сияние", tip: "Антиоксиданты и полноценный сон усиливают естественное сияние." },
+      firmness: { name: "Упругость", desc: "Эластичность кожи и контур лица", tip: "Процедуры, стимулирующие коллаген, помогают сохранить упругость." },
+      pores: { name: "Поры", desc: "Видимый размер и плотность пор", tip: "Ниацинамид и профессиональные пилинги уменьшают видимость пор." },
+      underEye: { name: "Область Под Глазами", desc: "Качество контура глаз и тёмные круги", tip: "Целевые средства для глаз и увлажнение уменьшают видимую усталость." },
+      redness: { name: "Баланс Покраснения", desc: "Поверхностное покраснение и воспаление", tip: "Успокаивающие ингредиенты, такие как центелла, помогают сбалансировать покраснение." },
+      hydration: { name: "Поверхностная Гидратация", desc: "Влажность поверхности и отражение света", tip: "Гиалуроновая кислота и восстановление барьера поддерживают поверхностное увлажнение." },
+    },
+    report: { savePdf: "Сохранить как PDF", yourSkinAnalysis: "Ваш Анализ Кожи", visualAssessment: "AI Эксперт по Коже — Визуальная Поверхностная Оценка", detailedResults: "Детальные Результаты", recommendedTreatments: "Рекомендованные Процедуры", about: "О BeautyBody", aboutDesc: "Премиум эстетические процедуры, адаптированные под вашу уникальную кожу. Запишитесь на бесплатную консультацию сегодня.", disclaimer: "Отказ от ответственности: Этот анализ основан только на визуальных поверхностных индикаторах и не является медицинским диагнозом. Результаты симулированы в демонстрационных целях. При медицинских проблемах обратитесь к дерматологу.", scanToBook: "Сканируйте для Записи" },
+    book: { title: "Записаться на Консультацию", desc: "Свяжитесь со специалистом BeautyBody через WhatsApp, чтобы обсудить ваш персонализированный план.", analysisSummary: "Ваш Анализ", overallScore: "Общий Скор", skinAge: "Возраст Кожи", interestedTreatments: "Интересующие процедуры", preferredTime: "Предпочтительное Время", additionalNotes: "Дополнительные Примечания", notesPlaceholder: "например, первый визит, чувствительная кожа, особые пожелания...", sendWhatsApp: "Отправить в WhatsApp", whatsAppNote: "Открывает WhatsApp с готовым сообщением для +34 603 847 323", morning: "Утро", afternoon: "День", evening: "Вечер", anyTime: "Любое Время", timeMorning: "9:00 – 12:00", timeAfternoon: "12:00 – 17:00", timeEvening: "17:00 – 20:00", timeAny: "Гибко", successTitle: "Сообщение Отправлено!", successDesc: "Специалист BeautyBody рассмотрит ваш анализ и ответит в течение 2 часов.", whatNext: "Что дальше?", step1: "Наша команда рассматривает результаты вашего анализа", step2: "Мы предлагаем доступные слоты для консультации через WhatsApp", step3: "Вы посещаете клинику для персонализированного плана лечения", shareFriend: "Поделиться с Подругой", viewReport: "Посмотреть Отчёт", backHome: "На Главную" },
+    treatments: {
+      "chemical-peel": { name: "Химический Пилинг", desc: "Профессиональная эксфолиация, удаляющая омертвевшие клетки кожи и открывающая более гладкую, сияющую кожу." },
+      "hydration-facial": { name: "Увлажняющий Фейшл", desc: "Глубокое увлажнение с гиалуроновой кислотой и керамидами для восстановления упругости и отражения света." },
+      "ipl-photofacial": { name: "IPL Фототерапия", desc: "Терапия интенсивным импульсным светом, направленная на пигментацию, покраснение и неровный тон." },
+      "microneedling": { name: "Микронидлинг", desc: "Терапия индукции коллагена, улучшающая текстуру, упругость и мелкие линии через контролируемые микроповреждения." },
+      "under-eye-revive": { name: "Восстановление Под Глазами", desc: "Специализированная процедура, направленная на тёмные круги, отёки и мелкие линии вокруг глаз." },
+      "radiofrequency": { name: "RF-Лифтинг", desc: "Неинвазивное укрепление кожи с помощью RF-энергии для стимуляции коллагена и улучшения эластичности." },
+    },
+    severity: { excellent: "Отлично", good: "Хорошо", fair: "Средне", attention: "Требует Внимания", priority: "Приоритет" },
   },
-
   es: {
-    // Navbar
-    navBrand: "BeautyBody",
-    navSubtitle: "Experto en Piel AI",
-    navAnalyze: "Analizar",
-
-    // Landing
-    landingTag: "Clínica Estética Premium",
-    landingTitle1: "Descubre la",
-    landingTitle2: "Historia de tu Piel",
-    landingDesc: "Una evaluación visual de lujo con IA que revela las características únicas de tu piel y te guía hacia tu yo más radiante.",
-    landingCtaPrimary: "Iniciar Análisis Gratuito",
-    landingCtaSecondary: "Comenzar Análisis",
-    landingDemoLabel: "Simulación de demostración — no es un diagnóstico médico",
-    landingSocialProof: "análisis completados",
-    landingTestimonialQuote: "El análisis fue increíblemente preciso. Identificó preocupaciones que yo misma había notado y las recomendaciones me llevaron a tratamientos que genuinely mejoraron mi piel.",
-    landingTestimonialName: "María G.",
-    landingTestimonialDetail: "Cliente de BeautyBody desde 2024",
-    landingWhyTitle: "Por Qué Elegir BeautyBody",
-    landingFeature1Title: "Análisis en 90 Segundos",
-    landingFeature1Desc: "Evaluación visual instantánea de la piel impulsada por tecnología avanzada de análisis de superficie.",
-    landingFeature2Title: "Privacidad Primero",
-    landingFeature2Desc: "Tus imágenes se procesan de forma segura. Sin almacenamiento permanente. Cumplimiento total del GDPR.",
-    landingFeature3Title: "Recomendaciones de Expertos",
-    landingFeature3Desc: "Sugerencias de tratamiento personalizadas de los especialistas en estética de BeautyBody.",
-    landingReady: "¿Lista para ver lo que tu piel te está diciendo?",
-
-    // Consent
-    consentStep: "Paso 1 de 3",
-    consentTitle: "Tu Privacidad Importa",
-    consentDesc: "Antes de comenzar, por favor revisa y confirma lo siguiente.",
-    consentAgeLabel: "Tu Rango de Edad",
-    consentRequired: "Obligatorio",
-    consentOptional: "Opcional",
-    consentItemAnalysis: "Doy mi consentimiento para el análisis visual automatizado de la superficie de mi foto para generar un informe personalizado de la piel.",
-    consentItemNotMedical: "Entiendo que esto es solo una evaluación visual de superficie y no un diagnóstico médico.",
-    consentItemPrivacy: "Acepto la Política de Privacidad y los Términos de Servicio.",
-    consentItemSimulation: "Entiendo que esta demostración utiliza análisis simulado con fines demostrativos.",
-    consentItemMarketing: "Doy mi consentimiento para que BeautyBody me contacte por WhatsApp con ofertas de tratamiento personalizadas.",
-    consentContinue: "Continuar al Análisis",
-    consentDataNote: "Tus datos se procesan localmente. Las imágenes no se almacenan permanentemente en esta demostración.",
-
-    // Scan
-    scanStep: "Paso 2 de 3",
-    scanTitle: "Captura tu Piel",
-    scanDesc: "Toma una foto clara con luz natural para la evaluación más precisa.",
-    scanTip1: "Retira el maquillaje y limpia tu rostro",
-    scanTip2: "Encuentra luz natural cerca de una ventana",
-    scanTip3: "Recoge el cabello hacia atrás y mira directamente a la cámara",
-    scanBestResults: "Para Mejores Resultados",
-    scanOpenCamera: "Abrir Cámara",
-    scanUploadPhoto: "Subir Foto",
-    scanCancel: "Cancelar",
-    scanCapture: "Capturar",
-    scanRetake: "Repetir",
-    scanAnalyze: "Analizar Mi Piel",
-    scanPreview: "Vista Previa",
-    scanFrontCamera: "Cámara Frontal",
-    scanPositionFace: "Posiciona tu rostro en el óvalo",
-    scanErrorCamera: "Acceso a la cámara denegado. Por favor, usa la carga de fotos.",
-    scanErrorFile: "Por favor, sube un archivo de imagen.",
-
-    // Processing
-    processingInitializing: "Inicializando protocolo de escaneo",
-    processingTexture: "Mapeando textura de la piel",
-    processingHydration: "Analizando hidratación superficial",
-    processingPigmentation: "Evaluando pigmentación",
-    processingPores: "Midiendo densidad de poros",
-    processingElasticity: "Evaluando marcadores de elasticidad",
-    processingCrossRef: "Verificando cruzada del perfil de piel",
-    processingGenerating: "Generando informe personalizado",
-    processingScanning: "Escaneando",
-    processingPercent: "por ciento",
-    processingDemoLabel: "Demostración Simulada — Solo Evaluación Visual",
-
-    // Results
-    resultsDemoLabel: "Modo Demo — Resultados de Simulación",
-    resultsYourScore: "Tu Puntuación de Piel",
-    resultsSkinAge: "Edad de la Piel",
-    resultsActualAge: "Edad Real",
-    resultsParameters: "Parámetros",
-    resultsFocusArea: "Área de Enfoque",
-    resultsYrsYounger: "años más joven",
-    resultsYrsOlder: "años mayor",
-    resultsMatchesAge: "Coincide con tu edad",
-    resultsDetailedAnalysis: "Análisis Detallado",
-    resultsRecommended: "Recomendado Para Ti",
-    resultsBasedOn: "Basado en tu análisis, estos tratamientos abordan tus áreas prioritarias.",
-    resultsSelected: "seleccionado",
-    resultsBookConsultation: "Reservar Consulta Gratuita",
-    resultsViewReport: "Ver Informe Completo",
-    resultsPriorityFocus: "Enfoque Prioritario",
-    resultsTopStrength: "Mayor Fortaleza",
-
-    // Report
-    reportYourAnalysis: "Tu Análisis de Piel",
-    reportSubtitle: "Experto en Piel AI — Evaluación Visual de Superficie",
-    reportScore: "Puntuación",
-    reportSkinAge: "Edad de la Piel",
-    reportActualAge: "Edad Real",
-    reportParameters: "Parámetros",
-    reportDetailedResults: "Resultados Detallados",
-    reportRecommendedTreatments: "Tratamientos Recomendados",
-    reportScanToBook: "Escanear para Reservar",
-    reportAbout: "Tratamientos estéticos premium adaptados a tu piel única. Reserva tu consulta gratuita hoy.",
-    reportDisclaimer: "Descargo de responsabilidad: Este análisis se basa únicamente en indicadores visuales de superficie y no es un diagnóstico médico. Los resultados son simulados con fines demostrativos. Para problemas médicos, consulta a un dermatólogo.",
-    reportSavePdf: "Guardar Informe como PDF",
-
-    // Booking
-    bookingTitle: "Reservar Tu Consulta",
-    bookingDesc: "Conecta con un especialista de BeautyBody por WhatsApp para discutir tu plan personalizado.",
-    bookingAnalysisSummary: "Resumen de Tu Análisis",
-    bookingOverallScore: "Puntuación General",
-    bookingSkinAge: "Edad de la Piel",
-    bookingInterestedTreatments: "Tratamientos de interés",
-    bookingPreferredTime: "Horario Preferido",
-    bookingAdditionalNotes: "Notas Adicionales",
-    bookingNotesPlaceholder: "p. ej., primera visita, piel sensible, preocupaciones específicas...",
-    bookingSendWhatsApp: "Enviar Mensaje por WhatsApp",
-    bookingWhatsAppNote: "Abre WhatsApp con un mensaje prellenado para +34 603 847 323",
-    bookingMessageSent: "¡Mensaje Enviado!",
-    bookingReplyTime: "Un especialista de BeautyBody revisará tu análisis y responderá en 2 horas.",
-    bookingWhatNext: "¿Qué sigue?",
-    bookingStep1: "Nuestro equipo revisa los resultados de tu análisis de piel",
-    bookingStep2: "Sugerimos franjas horarias disponibles para consulta por WhatsApp",
-    bookingStep3: "Visitas la clínica para tu plan de tratamiento personalizado",
-    bookingShareFriend: "Compartir con un Amigo",
-    bookingViewReport: "Ver Informe",
-    bookingBackHome: "Volver al Inicio",
-    bookingBack: "Atrás",
-
-    // Footer
-    footerBrand: "BeautyBody",
-    footerDemo: "Versión Demo",
-    footerDisclaimer: "Esta es una simulación de evaluación visual de superficie, no es un diagnóstico médico.",
-
-    // Severity labels
-    severityExcellent: "Excelente",
-    severityGood: "Bueno",
-    severityFair: "Regular",
-    severityAttention: "Requiere Atención",
-    severityPriority: "Prioridad",
-
-    // Skin parameters
-    paramTexture: "Textura de la Piel",
-    paramTextureDesc: "Suavidad de la superficie y visibilidad de líneas finas",
-    paramTextureTip: "La exfoliación regular y la hidratación mejoran la textura con el tiempo.",
-    paramEvenness: "Uniformidad",
-    paramEvennessDesc: "Uniformidad del tono de piel y decoloración",
-    paramEvennessTip: "La vitamina C y el SPF son clave para mantener un tono de piel uniforme.",
-    paramRadiance: "Luminosidad",
-    paramRadianceDesc: "Brillo de la piel y resplandor saludable",
-    paramRadianceTip: "Los antioxidantes y el sueño adecuado potencian el resplandor natural.",
-    paramFirmness: "Firmeza",
-    paramFirmnessDesc: "Elasticidad de la piel y apariencia del contorno",
-    paramFirmnessTip: "Los tratamientos que potencian el colágeno ayudan a mantener la firmeza.",
-    paramPores: "Apariencia de Poros",
-    paramPoresDesc: "Tamaño visible y densidad de poros",
-    paramPoresTip: "La niacinamida y los peeling profesionales refinan la apariencia de los poros.",
-    paramUnderEye: "Zona de Ojos",
-    paramUnderEyeDesc: "Calidad del contorno ocular y ojeras",
-    paramUnderEyeTip: "Los tratamientos específicos para ojos y la hidratación reducen la fatiga visible.",
-    paramRedness: "Balance de Enrojecimiento",
-    paramRednessDesc: "Enrojecimiento superficial y visibilidad de inflamación",
-    paramRednessTip: "Ingredientes calmantes como la centella ayudan a equilibrar el enrojecimiento.",
-    paramHydration: "Hidratación Superficial",
-    paramHydrationDesc: "Humedad superficial y reflectividad",
-    paramHydrationTip: "El ácido hialurónico y la reparación de la barrera mantienen la hidratación superficial.",
-
-    // Treatments
-    treatmentChemicalPeel: "Peeling Químico",
-    treatmentChemicalPeelDesc: "Un tratamiento profesional de exfoliación que elimina las células muertas de la piel, revelando una piel más suave y radiante.",
-    treatmentHydrationFacial: "Facial de Hidratación",
-    treatmentHydrationFacialDesc: "Entrega profunda de humedad con ácido hialurónico y ceramidas para restaurar la plenitud y el reflejo de la piel.",
-    treatmentIpl: "Fotofacial IPL",
-    treatmentIplDesc: "Terapia de Luz Intensa Pulsada dirigida a la decoloración, el enrojecimiento y el tono desigual de la piel.",
-    treatmentMicroneedling: "Microneedling",
-    treatmentMicroneedlingDesc: "Terapia de inducción de colágeno que mejora la textura, la firmeza y las líneas finas a través de microlesiones controladas.",
-    treatmentUnderEye: "Revitalización de Ojos",
-    treatmentUnderEyeDesc: "Tratamiento especializado dirigido a ojeras, hinchazón y líneas finas alrededor del delicado contorno ocular.",
-    treatmentRadiofrequency: "Reafirmación por Radiofrecuencia",
-    treatmentRadiofrequencyDesc: "Reafirmación de piel no invasiva usando energía RF para estimular el colágeno y mejorar la elasticidad.",
-
-    // Time preferences
-    timeMorning: "Mañana",
-    timeMorningRange: "9:00 – 12:00",
-    timeAfternoon: "Tarde",
-    timeAfternoonRange: "12:00 – 17:00",
-    timeEvening: "Noche",
-    timeEveningRange: "17:00 – 20:00",
-    timeAny: "Cualquier Hora",
-    timeAnyRange: "Flexible",
-
-    // Age ranges
-    age18_24: "18 – 24",
-    age25_34: "25 – 34",
-    age35_44: "35 – 44",
-    age45_54: "45 – 54",
-    age55plus: "55+",
-
-    // Loading / 404
-    loadingTitle: "Cargando BeautyBody",
-    loadingSubtitle: "Experto en Piel AI",
-    notFoundError: "Error",
-    notFoundTitle: "404",
-    notFoundDesc: "Esta página no existe.",
-    notFoundBack: "Volver al Inicio",
+    common: { brand: "BeautyBody", tagline: "AI Experto en Piel", analyze: "Analizar", back: "Atrás", continue: "Continuar", cancel: "Cancelar", save: "Guardar", download: "Descargar", share: "Compartir", book: "Reservar", demoMode: "Modo Demo — Simulación", notMedical: "Esta es una evaluación visual superficial, no un diagnóstico médico." },
+    landing: { subtitle: "Clínica Estética Premium", heroTitle1: "Descubre la", heroTitle2: "Historia de tu Piel", heroDesc: "Una evaluación visual de lujo con IA que revela las características únicas de tu piel y te guía hacia tu mayor radiancia.", ctaPrimary: "Iniciar Análisis Gratuito", ctaSecondary: "Comenzar Análisis", socialProof: "análisis completados", testimonialQuote: "El análisis fue increíblemente preciso. Identificó preocupaciones que yo misma había notado y las recomendaciones me llevaron a tratamientos que genuinely mejoraron mi piel.", testimonialName: "María G.", testimonialDetail: "Cliente de BeautyBody desde 2024", whyTitle: "Por Qué Elegir BeautyBody", feature1Title: "Análisis en 90 Segundos", feature1Desc: "Evaluación visual instantánea de la piel impulsada por tecnología avanzada de análisis superficial.", feature2Title: "Privacidad Primero", feature2Desc: "Tus imágenes se procesan de forma segura. Sin almacenamiento permanente. Cumplimiento total del GDPR.", feature3Title: "Recomendaciones Expertas", feature3Desc: "Sugerencias de tratamiento personalizadas de los especialistas en estética de BeautyBody.", readyText: "¿Lista para ver lo que tu piel te está diciendo?" },
+    consent: { stepLabel: "Paso 1 de 3", title: "Tu Privacidad Importa", desc: "Antes de comenzar, por favor revisa y confirma lo siguiente.", ageLabel: "Tu Rango de Edad", required: "Requerido", optional: "Opcional", consentItems: ["Doy mi consentimiento para el análisis visual automatizado de mi foto para generar un informe personalizado de mi piel.", "Entiendo que esto es solo una evaluación visual superficial y no un diagnóstico médico.", "Acepto la Política de Privacidad y los Términos de Servicio.", "Entiendo que esta demo utiliza análisis simulado con fines de demostración.", "Doy mi consentimiento para que BeautyBody me contacte vía WhatsApp con ofertas personalizadas. (Opcional)"], cta: "Continuar al Análisis", footer: "Tus datos se procesan localmente. Las imágenes no se almacenan permanentemente en esta demo." },
+    scan: { stepLabel: "Paso 2 de 3", title: "Captura tu Piel", desc: "Toma una foto clara con luz natural para la evaluación más precisa.", tipLabel: "Para Mejores Resultados", tip1: "Retira el maquillaje y limpia tu rostro", tip2: "Encuentra luz natural cerca de una ventana", tip3: "Recoge el cabello y mira directamente a la cámara", openCamera: "Abrir Cámara", uploadPhoto: "Subir Foto", previewLabel: "Vista Previa", retake: "Volver a Tomar", analyzeSkin: "Analizar mi Piel", cameraError: "Acceso a la cámara denegado. Por favor, usa la subida de fotos.", fileError: "Por favor, sube un archivo de imagen.", captureLabel: "Captura tu Piel", captureDesc: "Para mejores resultados, retira el maquillaje, encuentra luz natural y recoge el cabello.", frontCamera: "Cámara Frontal", positionFace: "Posiciona tu rostro en el óvalo" },
+    processing: { percentLabel: "por ciento", scanning: "Escaneando", steps: ["Inicializando protocolo de escaneo", "Mapeando textura de la piel", "Analizando hidratación superficial", "Evaluando pigmentación", "Midiendo densidad de poros", "Evaluando marcadores de elasticidad", "Verificando perfil de la piel", "Generando informe personalizado"], regions: ["Rostro completo", "Zona T y mejillas", "Frente", "Pómulos", "Área de la nariz", "Línea de la mandíbula", "Bajo los ojos", "Completado"], demoLabel: "Simulación Demo — Solo Evaluación Visual" },
+    results: { yourSkinScore: "Tu Puntuación de Piel", skinAge: "Edad de la Piel", actualAge: "Edad Real", parameters: "parámetros", focusArea: "Área de Enfoque", detailedAnalysis: "Análisis Detallado", recommendedForYou: "Recomendado Para Ti", recDesc: "Basado en tu análisis, estos tratamientos abordan tus áreas prioritarias.", selected: "seleccionados", bookConsultation: "Reservar Consulta Gratuita", viewReport: "Ver Informe Completo", priorityFocus: "Enfoque Prioritario", topStrength: "Mayor Fortaleza", yrsYounger: "años más joven", yrsOlder: "años mayor", matchesAge: "Coincide con tu edad" },
+    parameters: {
+      texture: { name: "Textura de la Piel", desc: "Suavidad superficial y visibilidad de líneas finas", tip: "La exfoliación regular y la hidratación mejoran la textura con el tiempo." },
+      evenness: { name: "Uniformidad", desc: "Uniformidad del tono de piel y decoloración", tip: "La vitamina C y el SPF son clave para mantener un tono uniforme." },
+      radiance: { name: "Radiancia", desc: "Luminosidad de la piel y brillo saludable", tip: "Los antioxidantes y el sueño adecuado potencian la radiancia natural." },
+      firmness: { name: "Firmeza", desc: "Elasticidad de la piel y apariencia del contorno", tip: "Los tratamientos que estimulan el colágeno ayudan a mantener la firmeza." },
+      pores: { name: "Apariencia de Poros", desc: "Tamaño visible y densidad de poros", tip: "La niacinamida y los peeling profesionales refinan la apariencia de los poros." },
+      underEye: { name: "Zona Bajo los Ojos", desc: "Calidad del contorno ocular y ojeras", tip: "Los tratamientos específicos para ojos y la hidratación reducen la fatiga visible." },
+      redness: { name: "Balance de Enrojecimiento", desc: "Enrojecimiento superficial y visibilidad de inflamación", tip: "Ingredientes calmantes como la centella ayudan a equilibrar el enrojecimiento." },
+      hydration: { name: "Hidratación Superficial", desc: "Humedad superficial y reflectividad", tip: "El ácido hialurónico y la reparación de la barrera apoyan la hidratación superficial." },
+    },
+    report: { savePdf: "Guardar como PDF", yourSkinAnalysis: "Tu Análisis de Piel", visualAssessment: "AI Experto en Piel — Evaluación Visual Superficial", detailedResults: "Resultados Detallados", recommendedTreatments: "Tratamientos Recomendados", about: "Sobre BeautyBody", aboutDesc: "Tratamientos estéticos premium adaptados a tu piel única. Reserva tu consulta gratuita hoy.", disclaimer: "Descargo de responsabilidad: Este análisis se basa únicamente en indicadores visuales superficiales y no es un diagnóstico médico. Los resultados son simulados con fines de demostración. Para problemas médicos, consulta a un dermatólogo.", scanToBook: "Escanear para Reservar" },
+    book: { title: "Reservar tu Consulta", desc: "Conecta con un especialista de BeautyBody vía WhatsApp para discutir tu plan personalizado.", analysisSummary: "Tu Resumen de Análisis", overallScore: "Puntuación General", skinAge: "Edad de la Piel", interestedTreatments: "Tratamientos de interés", preferredTime: "Horario Preferido", additionalNotes: "Notas Adicionales", notesPlaceholder: "ej., primera visita, piel sensible, preocupaciones específicas...", sendWhatsApp: "Enviar Mensaje por WhatsApp", whatsAppNote: "Abre WhatsApp con un mensaje predefinido para +34 603 847 323", morning: "Mañana", afternoon: "Tarde", evening: "Noche", anyTime: "Cualquier Hora", timeMorning: "9:00 – 12:00", timeAfternoon: "12:00 – 17:00", timeEvening: "17:00 – 20:00", timeAny: "Flexible", successTitle: "¡Mensaje Enviado!", successDesc: "Un especialista de BeautyBody revisará tu análisis y responderá en 2 horas.", whatNext: "¿Qué sigue?", step1: "Nuestro equipo revisa los resultados de tu análisis", step2: "Sugerimos horarios disponibles para consulta vía WhatsApp", step3: "Visitas la clínica para tu plan de tratamiento personalizado", shareFriend: "Compartir con una Amiga", viewReport: "Ver tu Informe", backHome: "Volver al Inicio" },
+    treatments: {
+      "chemical-peel": { name: "Peeling Químico", desc: "Tratamiento de exfoliación profesional que elimina células muertas, revelando una piel más suave y radiante." },
+      "hydration-facial": { name: "Facial de Hidratación", desc: "Hidratación profunda con ácido hialurónico y ceramidas para restaurar la plenitud y el reflejo superficial." },
+      "ipl-photofacial": { name: "Fototerapia IPL", desc: "Terapia de Luz Pulsada Intensa dirigida a la decoloración, el enrojecimiento y el tono desigual." },
+      "microneedling": { name: "Microneedling", desc: "Terapia de inducción de colágeno que mejora la textura, la firmeza y las líneas finas." },
+      "under-eye-revive": { name: "Revive Bajo los Ojos", desc: "Tratamiento especializado dirigido a ojeras, hinchazón y líneas finas alrededor del contorno ocular." },
+      "radiofrequency": { name: "Reafirmación por Radiofrecuencia", desc: "Reafirmación no invasiva de la piel usando energía RF para estimular el colágeno." },
+    },
+    severity: { excellent: "Excelente", good: "Bueno", fair: "Regular", attention: "Requiere Atención", priority: "Prioridad" },
   },
 } as const;
 
-export type TranslationKey = keyof (typeof translations)["en"];
+export type Translations = typeof translations.en;
 
-export function useTranslation() {
-  const [lang, setLangState] = useState<Lang>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(STORAGE_KEY) as Lang | null;
-      if (stored && ["en", "ru", "es"].includes(stored)) return stored;
+export function t(lang: Lang, path: string): string {
+  const keys = path.split(".");
+  let value: unknown = translations[lang];
+  for (const key of keys) {
+    if (value && typeof value === "object" && key in value) {
+      value = (value as Record<string, unknown>)[key];
+    } else {
+      let fallback: unknown = translations.en;
+      for (const k of keys) {
+        if (fallback && typeof fallback === "object" && k in fallback) {
+          fallback = (fallback as Record<string, unknown>)[k];
+        } else {
+          return path;
+        }
+      }
+      return typeof fallback === "string" ? fallback : path;
     }
-    return "es"; // Default: Spanish
-  });
+  }
+  return typeof value === "string" ? value : path;
+}
 
-  const t = useCallback(
-    (key: TranslationKey) => {
-      return translations[lang][key] ?? translations["en"][key] ?? key;
-    },
-    [lang]
-  );
+export function getParamTranslation(lang: Lang, paramId: string) {
+  const params = translations[lang].parameters as Record<string, { name: string; desc: string; tip: string }>;
+  const fallback = translations.en.parameters as Record<string, { name: string; desc: string; tip: string }>;
+  return params[paramId] || fallback[paramId] || { name: paramId, desc: "", tip: "" };
+}
 
-  const setLang = useCallback((newLang: Lang) => {
-    setLangState(newLang);
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, newLang);
-    }
-  }, []);
+export function getTreatmentTranslation(lang: Lang, treatmentId: string) {
+  const treatments = translations[lang].treatments as Record<string, { name: string; desc: string }>;
+  const fallback = translations.en.treatments as Record<string, { name: string; desc: string }>;
+  return treatments[treatmentId] || fallback[treatmentId] || { name: treatmentId, desc: "" };
+}
 
-  return { t, lang, setLang };
+export function getSeverityTranslation(lang: Lang, severityKey: string): string {
+  const sev = translations[lang].severity as Record<string, string>;
+  const fallback = translations.en.severity as Record<string, string>;
+  return sev[severityKey] || fallback[severityKey] || severityKey;
 }
