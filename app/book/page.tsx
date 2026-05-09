@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MessageCircle, ArrowLeft, Check, Sparkles, Share2, CalendarDays } from "lucide-react";
+import { MessageCircle, Clock, ArrowLeft, Check, Sparkles, Share2, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useAnalysis } from "@/context/analysis-context";
@@ -38,41 +38,30 @@ export default function BookPage() {
     .filter((t) => selectedTreatments.includes(t.id))
     .map((t) => t.name);
 
-  const defaultTreatments =
-    treatmentNames.length > 0
-      ? treatmentNames
-      : analysis.recommendations.slice(0, 2).map((t) => t.name);
+  const defaultTreatments = treatmentNames.length > 0
+    ? treatmentNames
+    : analysis.recommendations.slice(0, 2).map((t) => t.name);
 
   const generateWhatsAppMessage = () => {
-    const time =
-      TIME_PREFERENCES.find((t) => t.id === timePreference)?.label || "Any Time";
-
-    const treatmentList = defaultTreatments
-      .map((treatment) => "• " + treatment)
-      .join("\n");
+    const treatments = defaultTreatments.join(", ");
+    const time = TIME_PREFERENCES.find((t) => t.id === timePreference)?.label || "Any Time";
+    const treatmentList = treatments.split(", ").map((t) => "• " + t).join("\n");
+    const notesLine = notes ? "\nNotes: " + notes : "";
 
     const lines = [
       "Hi BeautyBody! 👋",
       "",
       "I just completed my AI Skin Analysis on your website.",
-      "My results: Overall Score " +
-        analysis.overallScore +
-        "/100 | Skin Age: " +
-        analysis.skinAge,
+      "My results: Overall Score " + analysis.overallScore + "/100 | Skin Age: " + analysis.skinAge,
       "",
       "I'm interested in:",
       treatmentList,
       "",
       "My preferred time: " + time,
+      notesLine,
+      "",
+      "I'd love to book a free consultation. Thank you! ✨",
     ];
-
-    if (notes.trim()) {
-      lines.push("");
-      lines.push("Notes: " + notes.trim());
-    }
-
-    lines.push("");
-    lines.push("I'd love to book a free consultation. Thank you! ✨");
 
     return lines.join("\n");
   };
@@ -86,17 +75,13 @@ export default function BookPage() {
   const handleShare = async () => {
     const shareData = {
       title: "My BeautyBody Skin Analysis",
-      text:
-        "I just got my skin analyzed! Score: " +
-        analysis.overallScore +
-        "/100. Check out BeautyBody AI Skin Expert.",
+      text: "I just got my skin analyzed! Score: " + analysis.overallScore + "/100. Check out BeautyBody AI Skin Expert.",
       url: window.location.origin,
     };
-
     if (navigator.share) {
       await navigator.share(shareData);
     } else {
-      await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+      await navigator.clipboard.writeText(shareData.text + " " + shareData.url);
     }
   };
 
@@ -128,9 +113,7 @@ export default function BookPage() {
             ].map((step) => (
               <div key={step.num} className="flex items-start gap-3">
                 <div className="w-7 h-7 rounded-full bg-champagne-500/10 flex items-center justify-center shrink-0 mt-0.5 border border-champagne-500/10">
-                  <span className="text-champagne-400 text-xs font-bold">
-                    {step.num}
-                  </span>
+                  <span className="text-champagne-400 text-xs font-bold">{step.num}</span>
                 </div>
                 <p className="text-white/55 text-sm leading-relaxed">{step.text}</p>
               </div>
@@ -143,14 +126,12 @@ export default function BookPage() {
             <Share2 className="mr-2 h-5 w-5" />
             Share With a Friend
           </Button>
-
           <Link href="/report">
             <Button variant="ghost" className="w-full">
               <CalendarDays className="mr-2 h-5 w-5" />
               View Your Report
             </Button>
           </Link>
-
           <Link href="/">
             <Button variant="ghost" className="w-full text-white/40">
               Back to Home
@@ -178,51 +159,34 @@ export default function BookPage() {
         <div className="w-14 h-14 rounded-2xl bg-champagne-500/10 flex items-center justify-center mx-auto mb-4 border border-champagne-500/10">
           <MessageCircle className="w-7 h-7 text-champagne-400" strokeWidth={1.5} />
         </div>
-        <h1 className="font-display text-2xl text-white mb-2">
-          Book Your Consultation
-        </h1>
+        <h1 className="font-display text-2xl text-white mb-2">Book Your Consultation</h1>
         <p className="text-white/45 text-sm max-w-xs mx-auto">
           Connect with a BeautyBody specialist via WhatsApp to discuss your personalized plan.
         </p>
       </motion.div>
 
+      {/* Analysis Summary */}
       <GlassCard className="p-5 mb-6">
         <div className="flex items-center gap-3 mb-4">
           <Sparkles className="w-5 h-5 text-champagne-400" strokeWidth={1.5} />
           <h3 className="text-white font-medium text-sm">Your Analysis Summary</h3>
         </div>
-
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="p-3 rounded-xl bg-white/5">
-            <p className="text-white/35 text-[10px] uppercase tracking-wider mb-1">
-              Overall Score
-            </p>
-            <p className="text-white font-bold text-lg tabular-nums">
-              {analysis.overallScore}/100
-            </p>
+            <p className="text-white/35 text-[10px] uppercase tracking-wider mb-1">Overall Score</p>
+            <p className="text-white font-bold text-lg tabular-nums">{analysis.overallScore}/100</p>
           </div>
-
           <div className="p-3 rounded-xl bg-white/5">
-            <p className="text-white/35 text-[10px] uppercase tracking-wider mb-1">
-              Skin Age
-            </p>
-            <p className="text-white font-bold text-lg tabular-nums">
-              {analysis.skinAge}
-            </p>
+            <p className="text-white/35 text-[10px] uppercase tracking-wider mb-1">Skin Age</p>
+            <p className="text-white font-bold text-lg tabular-nums">{analysis.skinAge}</p>
           </div>
         </div>
-
         {defaultTreatments.length > 0 && (
           <div className="mt-4">
-            <p className="text-white/35 text-[10px] uppercase tracking-wider mb-2">
-              Interested treatments:
-            </p>
+            <p className="text-white/35 text-[10px] uppercase tracking-wider mb-2">Interested treatments:</p>
             <div className="flex flex-wrap gap-2">
               {defaultTreatments.map((t) => (
-                <span
-                  key={t}
-                  className="text-xs px-3 py-1.5 rounded-full bg-champagne-500/8 text-champagne-400 border border-champagne-500/10"
-                >
+                <span key={t} className="text-xs px-3 py-1.5 rounded-full bg-champagne-500/8 text-champagne-400 border border-champagne-500/10">
                   {t}
                 </span>
               ))}
@@ -231,10 +195,9 @@ export default function BookPage() {
         )}
       </GlassCard>
 
+      {/* Time Preference */}
       <div className="mb-6">
-        <h3 className="text-white/50 text-xs font-medium uppercase tracking-wider mb-3">
-          Preferred Time
-        </h3>
+        <h3 className="text-white/50 text-xs font-medium uppercase tracking-wider mb-3">Preferred Time</h3>
         <div className="grid grid-cols-2 gap-2.5">
           {TIME_PREFERENCES.map((time) => (
             <button
@@ -253,16 +216,12 @@ export default function BookPage() {
         </div>
       </div>
 
+      {/* Notes */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-white/50 text-xs font-medium uppercase tracking-wider">
-            Additional Notes
-          </h3>
-          <span className="text-white/20 text-[10px]">
-            {notes.length}/{MAX_NOTES_LENGTH}
-          </span>
+          <h3 className="text-white/50 text-xs font-medium uppercase tracking-wider">Additional Notes</h3>
+          <span className="text-white/20 text-[10px]">{notes.length}/{MAX_NOTES_LENGTH}</span>
         </div>
-
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value.slice(0, MAX_NOTES_LENGTH))}
@@ -271,6 +230,7 @@ export default function BookPage() {
         />
       </div>
 
+      {/* WhatsApp CTA */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -280,7 +240,6 @@ export default function BookPage() {
           <MessageCircle className="mr-2 h-5 w-5" />
           Send WhatsApp Message
         </Button>
-
         <p className="text-center text-white/25 text-xs mt-3">
           Opens WhatsApp with a pre-filled message to +34 603 847 323
         </p>
