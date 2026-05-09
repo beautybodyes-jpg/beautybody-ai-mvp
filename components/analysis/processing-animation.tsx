@@ -9,7 +9,7 @@ interface ProcessingStep {
   region?: string;
 }
 
-const STEPS: ProcessingStep[] = [
+const DEFAULT_STEPS: ProcessingStep[] = [
   { label: "Initializing scan protocol", duration: 1800, region: "Full face" },
   { label: "Mapping skin texture", duration: 2200, region: "T-zone & cheeks" },
   { label: "Analyzing hydration surface", duration: 2000, region: "Forehead" },
@@ -20,12 +20,26 @@ const STEPS: ProcessingStep[] = [
   { label: "Generating personalized report", duration: 2000, region: "Complete" },
 ];
 
-export function ProcessingAnimation({ onComplete }: { onComplete: () => void }) {
+export interface ProcessingAnimationProps {
+  onComplete?: () => void;
+  steps?: ProcessingStep[];
+  percentLabel?: string;
+  scanningLabel?: string;
+  demoLabel?: string;
+}
+
+export function ProcessingAnimation({
+  onComplete,
+  steps = DEFAULT_STEPS,
+  percentLabel = "percent",
+  scanningLabel = "Scanning",
+  demoLabel = "Demo Simulation — Visual Assessment Only",
+}: ProcessingAnimationProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [scanLineY, setScanLineY] = useState(0);
 
-  const totalDuration = useMemo(() => STEPS.reduce((s, st) => s + st.duration, 0), []);
+  const totalDuration = useMemo(() => steps.reduce((s, st) => s + st.duration, 0), [steps]);
 
   useEffect(() => {
     let stepIndex = 0;
@@ -38,35 +52,37 @@ export function ProcessingAnimation({ onComplete }: { onComplete: () => void }) 
       setProgress(pct);
       setScanLineY(pct);
 
-      const stepThreshold = STEPS.slice(0, stepIndex + 1).reduce((s, st) => s + st.duration, 0);
-      if (totalElapsed >= stepThreshold && stepIndex < STEPS.length - 1) {
+      const stepThreshold = steps.slice(0, stepIndex + 1).reduce((s, st) => s + st.duration, 0);
+      if (totalElapsed >= stepThreshold && stepIndex < steps.length - 1) {
         stepIndex++;
         setCurrentStep(stepIndex);
       }
 
       if (totalElapsed >= totalDuration) {
         clearInterval(interval);
-        setTimeout(onComplete, 600);
+        setTimeout(() => {
+          if (onComplete) onComplete();
+        }, 600);
       }
     }, intervalMs);
 
     return () => clearInterval(interval);
-  }, [totalDuration, onComplete]);
+  }, [totalDuration, onComplete, steps]);
 
-  const currentRegion = STEPS[currentStep]?.region || "";
+  const currentRegion = steps[currentStep]?.region || "";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-5 relative overflow-hidden">
       {/* Background grid */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-        <div 
+        <div
           className="w-full h-full"
           style={{
             backgroundImage: `
               linear-gradient(rgba(201,169,110,0.3) 1px, transparent 1px),
               linear-gradient(90deg, rgba(201,169,110,0.3) 1px, transparent 1px)
             `,
-            backgroundSize: '40px 40px',
+            backgroundSize: "40px 40px",
           }}
         />
       </div>
@@ -132,7 +148,9 @@ export function ProcessingAnimation({ onComplete }: { onComplete: () => void }) 
           >
             {Math.round(progress)}
           </motion.span>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-white/30 mt-1">percent</span>
+          <span className="text-[10px] uppercase tracking-[0.2em] text-white/30 mt-1">
+            {percentLabel}
+          </span>
         </div>
       </div>
 
@@ -146,14 +164,14 @@ export function ProcessingAnimation({ onComplete }: { onComplete: () => void }) 
           className="mb-6 px-4 py-1.5 rounded-full border border-champagne-500/15 bg-champagne-500/5"
         >
           <span className="text-xs text-champagne-400/80 tracking-wide">
-            Scanning: {currentRegion}
+            {scanningLabel}: {currentRegion}
           </span>
         </motion.div>
       </AnimatePresence>
 
       {/* Steps list */}
       <div className="w-full max-w-xs space-y-2.5">
-        {STEPS.map((step, i) => {
+        {steps.map((step, i) => {
           const isDone = i < currentStep;
           const isActive = i === currentStep;
           const isPending = i > currentStep;
@@ -192,13 +210,15 @@ export function ProcessingAnimation({ onComplete }: { onComplete: () => void }) 
                     transition={{ duration: 1.2, repeat: Infinity }}
                   />
                 )}
-                {isPending && (
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/15" />
-                )}
+                {isPending && <div className="w-1.5 h-1.5 rounded-full bg-white/15" />}
               </div>
               <span
                 className={`text-sm transition-colors duration-300 ${
-                  isActive ? "text-white font-medium" : isDone ? "text-white/60" : "text-white/30"
+                  isActive
+                    ? "text-white font-medium"
+                    : isDone
+                    ? "text-white/60"
+                    : "text-white/30"
                 }`}
               >
                 {step.label}
@@ -224,7 +244,7 @@ export function ProcessingAnimation({ onComplete }: { onComplete: () => void }) 
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
       >
-        Demo Simulation — Visual Assessment Only
+        {demoLabel}
       </motion.p>
     </div>
   );
