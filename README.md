@@ -1,0 +1,1 @@
+# beautybody-ai-mvp
