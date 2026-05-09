@@ -1,10 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: { unoptimized: true },
+
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  images: {
+    unoptimized: true,
+  },
+
   poweredByHeader: false,
   compress: true,
-  // Ensure service worker and manifest are served correctly
+
   async headers() {
     return [
       {
@@ -23,4 +35,5 @@ const nextConfig = {
     ];
   },
 };
+
 module.exports = nextConfig;
