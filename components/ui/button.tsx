@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -15,14 +16,14 @@ export function Button({
   children,
   variant = "primary",
   size = "md",
-  isLoading,
+  isLoading = false,
   glow = false,
   className,
   disabled,
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center rounded-2xl font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-champagne-400/50 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] touch-manipulation";
+    "inline-flex items-center justify-center rounded-2xl font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-champagne-400/50 disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation";
 
   const variants = {
     primary:
@@ -42,22 +43,24 @@ export function Button({
 
   return (
     <motion.button
+      type={props.type || "button"}
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={cn(
         baseStyles,
         variants[variant],
         sizes[size],
-        glow && "shadow-[0_0_24px_rgba(201,169,110,0.2)] hover:shadow-[0_0_36px_rgba(201,169,110,0.3)]",
+        glow &&
+          "shadow-[0_0_24px_rgba(201,169,110,0.2)] hover:shadow-[0_0_36px_rgba(201,169,110,0.3)]",
         className
       )}
       disabled={disabled || isLoading}
       {...props}
     >
-      {isLoading && (
+      {isLoading ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin shrink-0" />
-      )}
-      <span className="truncate">{children}</span>
+      ) : null}
+      {children}
     </motion.button>
   );
 }
