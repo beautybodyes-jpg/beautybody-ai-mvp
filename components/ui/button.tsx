@@ -1,10 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends HTMLMotionProps<"button"> {
   variant?: "primary" | "secondary" | "ghost" | "outline";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
@@ -29,7 +29,8 @@ export function Button({
       "bg-champagne-500 text-stone-900 hover:bg-champagne-400 active:bg-champagne-600",
     secondary:
       "bg-white/10 text-white hover:bg-white/15 active:bg-white/20 backdrop-blur-sm border border-white/10",
-    ghost: "text-white/70 hover:text-white hover:bg-white/5 active:bg-white/10",
+    ghost:
+      "text-white/70 hover:text-white hover:bg-white/5 active:bg-white/10",
     outline:
       "border border-white/20 text-white hover:bg-white/5 hover:border-white/30 active:bg-white/10",
   };
@@ -48,7 +49,8 @@ export function Button({
         baseStyles,
         variants[variant],
         sizes[size],
-        glow && "shadow-[0_0_24px_rgba(201,169,110,0.2)] hover:shadow-[0_0_36px_rgba(201,169,110,0.3)]",
+        glow &&
+          "shadow-[0_0_24px_rgba(201,169,110,0.2)] hover:shadow-[0_0_36px_rgba(201,169,110,0.3)]",
         className
       )}
       disabled={disabled || isLoading}
