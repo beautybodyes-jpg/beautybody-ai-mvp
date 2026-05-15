@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Camera, Sun, Sparkles, User } from "lucide-react";
@@ -10,7 +10,7 @@ import { useLanguage } from "@/hooks/use-language";
 
 export default function ScanPage() {
   const router = useRouter();
-  const { session, setCapturedImage } = useAnalysis();
+  const { session, setCapturedImage, setCapturedFile } = useAnalysis();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -19,13 +19,51 @@ export default function ScanPage() {
     }
   }, [session, router]);
 
-  const handleCapture = (imageUrl: string, _file: File) => {
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      navigator.vibrate(50);
-    }
-    setCapturedImage(imageUrl);
-    router.push("/processing");
-  };
+  const handleCapture = useCallback(
+    (imageUrl: string, file: File) => {
+      try {
+        if (
+          typeof window !== "undefined" &&
+          typeof navigator !== "undefined" &&
+          navigator.vibrate &&
+          typeof navigator.vibrate === "function"
+        ) {
+          navigator.vibrate(50);
+        }
+      } catch {
+        /* ignore */
+      }
+
+      setCapturedFile(file);
+
+      try {
+        if (typeof window !== "undefined" && "FileReader" in window) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string | null;
+            if (result) {
+              setCapturedImage(result);
+            } else {
+              setCapturedImage(imageUrl);
+            }
+            router.push("/processing");
+          };
+          reader.onerror = () => {
+            setCapturedImage(imageUrl);
+            router.push("/processing");
+          };
+          reader.readAsDataURL(file);
+          return;
+        }
+      } catch {
+        /* fall through to blob URL */
+      }
+
+      setCapturedImage(imageUrl);
+      router.push("/processing");
+    },
+    [setCapturedImage, setCapturedFile, router]
+  );
 
   if (!session) return null;
 
@@ -55,7 +93,9 @@ export default function ScanPage() {
         <div className="w-12 h-12 rounded-xl bg-champagne-500/10 flex items-center justify-center mx-auto mb-3 border border-champagne-500/10">
           <Camera className="w-6 h-6 text-champagne-400" strokeWidth={1.5} />
         </div>
-        <h1 className="font-display text-2xl text-white mb-1.5">{t("scan.title")}</h1>
+        <h1 className="font-display text-2xl text-white mb-1.5">
+          {t("scan.title")}
+        </h1>
         <p className="text-white/45 text-sm max-w-xs mx-auto">
           {t("scan.desc")}
         </p>
