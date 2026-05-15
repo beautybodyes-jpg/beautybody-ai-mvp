@@ -4,13 +4,22 @@ import { getRecommendations } from "./treatments";
 import { generateId } from "./utils";
 
 export async function hashImage(file: File): Promise<number> {
-  const buffer = await file.arrayBuffer();
-  const view = new Uint8Array(buffer);
-  let hash = 0;
-  for (let i = 0; i < Math.min(view.length, 2000); i++) {
-    hash = ((hash << 5) - hash + view[i]) | 0;
+  try {
+    const buffer = await file.arrayBuffer();
+    const view = new Uint8Array(buffer);
+    let hash = 0;
+    const limit = Math.min(view.length, 2000);
+    for (let i = 0; i < limit; i++) {
+      hash = ((hash << 5) - hash + view[i]) | 0;
+    }
+    return Math.abs(hash);
+  } catch (err) {
+    if (typeof console !== "undefined") {
+      // eslint-disable-next-line no-console
+      console.error("hashImage error:", err);
+    }
+    return Math.floor(Math.random() * 1000000);
   }
-  return Math.abs(hash);
 }
 
 function seededRandom(seed: number): number {
@@ -34,7 +43,10 @@ export function generateMockAnalysis(
 
   const ageDiff = Math.round((50 - overallScore) * 0.25);
   let skinAge = chronologicalAge + ageDiff;
-  skinAge = Math.max(chronologicalAge - 4, Math.min(chronologicalAge + 10, skinAge));
+  skinAge = Math.max(
+    chronologicalAge - 4,
+    Math.min(chronologicalAge + 10, skinAge)
+  );
 
   const sorted = [...params].sort((a, b) => a.score - b.score);
   const priorityConcern = sorted[0];
